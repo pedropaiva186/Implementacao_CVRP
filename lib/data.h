@@ -6,7 +6,8 @@ class Data
     private:
         Data();
         static Data *instance;
-        
+        double calculateDist(double *x1, double *y1, double *x2, double *y2);
+
     public:
         int dim;
         double **matrizAdj;

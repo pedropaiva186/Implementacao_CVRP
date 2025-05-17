@@ -15,6 +15,7 @@ int main() {
     Data &data = Data::getInstance();
 
     std::cout << data.dim << std::endl;
+    std::cout << data.capacidade << std::endl;
 
     return 0;
 }

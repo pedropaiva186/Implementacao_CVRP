@@ -1,7 +1,16 @@
 #include <iostream>
 #include <fstream>
+#include <cmath>
 
 #include "data.h"
+
+double calculateDist(double *x1, double *y1, double *x2, double *y2)
+{
+    double delta1 = *x1 - *x2;
+    double delta2 = *y1 - *y2;
+
+    return 1 / 100 * floor(100 * sqrt(pow(delta1, 2) + pow(delta2, 2)));
+}
 
 // Definindo uma variável global que guardará as informações da instância
 Data * Data::instance = nullptr;
