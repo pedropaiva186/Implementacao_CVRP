@@ -1,7 +1,7 @@
 all: create
 
 create:
-	g++ *.cpp -o code -O3
+	g++ *.cpp lib/*.cpp -o code -O3
 
 run:
 	./code
