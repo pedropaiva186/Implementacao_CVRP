@@ -4,12 +4,12 @@
 
 #include "data.h"
 
-double calculateDist(double *x1, double *y1, double *x2, double *y2)
+double Data::calculateDist(double *x1, double *y1, double *x2, double *y2)
 {
     double delta1 = *x1 - *x2;
     double delta2 = *y1 - *y2;
 
-    return 1 / 100 * floor(100 * sqrt(pow(delta1, 2) + pow(delta2, 2)));
+    return (1.0 / 100) * floor(100 * sqrt(pow(delta1, 2) + pow(delta2, 2)));
 }
 
 // Definindo uma variável global que guardará as informações da instância
@@ -101,6 +101,88 @@ void Data::readData(int argNum, char **args)
 
     // Recolhendo a capacidade máxima
     file >> instance->capacidade;
+
+    // Criando a matriz de distâncias
+    while(in.compare("NODE_COORD_SECTION"))
+    {
+        file >> in;
+    }
+
+    // Elementos que servirão para execução dos cálculos
+    int pos1 = file.tellg();
+    double x1, y1, x2, y2;
+
+    // Criando a matriz que armazenará os elementos
+    instance->matrizAdj = new double*[instance->dim + 1];
+
+    for(int i = 0; i < instance->dim + 1; i++)
+    {
+        instance->matrizAdj[i] = new double[instance->dim + 1];
+    }
+
+    // Lendo o arquivo e inserindo os valores nos atributos do objeto
+    for(int count1 = 1; count1 <= instance->dim; count1++)
+    {   
+        // Posicionando a stream
+        file.seekg(pos1);
+
+        // Lendo o indíce disponível, mas não faremos nada com ele
+        file >> in;
+
+        // Lendo os valores nos quais serão executados os cálculos
+        file >> x1;
+        file >> y1;
+
+        // Salvando a posição no arquivo, para ele retornar depois
+        pos1 = file.tellg();
+
+        for(int count2 = count1; count2 <= instance->dim; count2++)
+        {   
+            if(count1 == count2)
+            {
+                instance->matrizAdj[count1][count2] = 0;
+                continue;
+            }
+
+            // Fazendo a leitura do indície
+            file >> in;
+
+            // Salvando os valores
+            file >> x2;
+            file >> y2;
+
+            // Salvando na matriz de distâncias
+            double valor = Data::calculateDist(&x1, &y1, &x2, &y2);
+
+            instance->matrizAdj[count1][count2] = valor;
+            instance->matrizAdj[count2][count1] = valor;
+        }
+    }
+
+    // Lendo das demandas
+    while(1)
+    {
+        file >> in;
+        if(!in.compare("DEMAND_SECTION"))
+        {
+            break;
+        }
+    }
+
+    instance->arrayDmds = new int(instance->dim);
+
+    int valor;
+
+    for(int count = 1; count <= instance->dim; count++)
+    {
+        // Executando a leitura dos indíces
+        file >> in;
+
+        // Resgatando o valor
+        file >> valor;
+
+        instance->arrayDmds[count] = valor;
+    }
 
     file.close();
 }

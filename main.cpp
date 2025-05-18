@@ -8,14 +8,11 @@ int main() {
 
     // Local onde colocaremos o tipo do problema e a instância que utilizaremos
     args[0] = (char *) "CVRP";
-    args[1] = (char *) "instances/X-n101-k25.vrp";
+    args[1] = (char *) "instances/X-n1001-k43.vrp";
 
     Data::readData(2, args);
 
     Data &data = Data::getInstance();
-
-    std::cout << data.dim << std::endl;
-    std::cout << data.capacidade << std::endl;
 
     return 0;
 }
