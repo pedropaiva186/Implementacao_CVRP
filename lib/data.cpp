@@ -115,7 +115,7 @@ void Data::readData(int argNum, char **args)
     // Criando a matriz que armazenará os elementos
     instance->matrizAdj = new double*[instance->dim + 1];
 
-    for(int i = 0; i < instance->dim + 1; i++)
+    for(int i = 1; i < instance->dim + 1; i++)
     {
         instance->matrizAdj[i] = new double[instance->dim + 1];
     }
@@ -169,7 +169,7 @@ void Data::readData(int argNum, char **args)
         }
     }
 
-    instance->arrayDmds = new int(instance->dim);
+    instance->arrayDmds = new int[instance->dim + 1];
 
     int valor;
 

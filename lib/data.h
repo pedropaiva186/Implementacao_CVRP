@@ -18,4 +18,5 @@ class Data
         static void readData(int argNum, char **args);
 
 };
+
 #endif
