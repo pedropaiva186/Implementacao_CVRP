@@ -1,9 +1,13 @@
 #include <iostream>
+#include <random>
 
 #include "lib/data.h"
 #include "lib/solution.h"
+#include "lib/random.h"
 
 int main() {
+    std::random_device rd;
+    Random::randomize(rd());
 
     char *args[2];
 
@@ -16,6 +20,8 @@ int main() {
     Data &data = Data::getInstance();
 
     Solution sol = Solution::criarSolucaoInicial();
+
+    sol = Solution::ruin(sol);
 
     sol.exibirSolucao();
 
