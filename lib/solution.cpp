@@ -3,6 +3,7 @@
 #include <unordered_set>
 #include <algorithm>
 #include <cmath>
+#include <random>
 
 #include "solution.h"
 #include "data.h"
@@ -49,7 +50,7 @@ Solution Solution::criarSolucaoInicial()
     // Criando a solução que será retornada
     Solution sol;
 
-    for(int i = 1; i <= data.dim; i++)
+    for(int i = 2; i <= data.dim; i++)
     {
         sol.rotas.emplace_back(rota({1, i, 1}, arrayDms[i], 2 * matrizAdj[i][1]));
     }
@@ -58,7 +59,7 @@ Solution Solution::criarSolucaoInicial()
 }
 
 // Função que consultará qual a rota de determinado vértice
-int Solution::consultaRota(int vertice)
+int Solution::consultaRota(int &vertice)
 {
     for(int i = 0; i < rotas.size(); i++)
     {
@@ -75,7 +76,7 @@ int Solution::consultaRota(int vertice)
 }
 
 // Função que consulturá a posição de determinado vértice numa rota
-int Solution::consultaPos(int vertice, int rota)
+int Solution::consultaPos(int &vertice, int &rota)
 {
     auto &rot = rotas[rota].vertices;
 
@@ -117,14 +118,8 @@ Solution Solution::ruin(Solution &sC)
     double qtdMaxStr = ((4.0 * cMedia) / (1 + cardMax)) - 1;
     int qtdStr = std::floor(Random::getReal(1, qtdMaxStr + 1));
 
-    // Escolhendo a rota em que o elemento será escolhido
-    int indexRota = Random::getInt(0, rots.size() - 1);
-
-    // Escolhendo o C seed, onde ele vai desconsiderar o depósito
-    int indexElemento = Random::getInt(1, rots[indexRota].vertices.size() - 2);
-
     // Definindo o consumidor que será o C seed
-    int elementoC = rots[indexRota].vertices[indexElemento];
+    int elementoC = Random::getInt(2, data.dim);
 
     std::unordered_set<int> rotasAlteradas;
     std::vector<vert> eleAdj;
@@ -137,9 +132,11 @@ Solution Solution::ruin(Solution &sC)
 
     std::sort(eleAdj.begin(), eleAdj.end(), compareByDist);
 
+    int rotasAlt = 0;
+
     for(vert &vertice : eleAdj)
     {   
-        if(rotasAlteradas.size() >= qtdStr)
+        if(rotasAlt >= qtdStr)
             break;
 
         int rotaVert = s.consultaRota(vertice.c);
@@ -156,16 +153,10 @@ Solution Solution::ruin(Solution &sC)
         // Armazenando a posição do elemento em relação a rota que ele está
         int indexVert = s.consultaPos(vertice.c, rotaVert);
 
-        std::cout << "Elemento que será excluído: " << vertice.c << std::endl;
-        std::cout << "Posição dele na rota: " << indexVert << std::endl;
-
-        // Deletando os elementos em si
         for(int i = 1; i <= cardTour; i++)
         {   
             // Decidindo o elemento que será deletado
             int indexDel = indexVert + Random::getInt((-1 * (1 % i)), 0);
-
-            std::cout << (-1 * (1 % i)) << std::endl;
 
             // Salvando-o no set de vértices que estão sobrando
             s.vertSobrando.insert(rotMomento[indexDel]);
@@ -182,16 +173,130 @@ Solution Solution::ruin(Solution &sC)
             rotMomento.erase(rotMomento.begin() + indexDel);
         }
 
-        // Inserindo a rota deletada no set de rotas
-        rotasAlteradas.insert(rotaVert);
+        // Significa que a rota está vazia, portanto ele será apagado das rotas
+        if(rotMomento.size() == 2)
+        {
+            rots.erase(rots.begin() + rotaVert);
+        } else // Inserindo a rota deletada no set de rotas
+        {
+            rotasAlteradas.insert(rotaVert);
+        }        
+
+        // Somando ao número de rotas alteradas
+        rotasAlt++;
     }
 
     return s;
 }
 
 Solution Solution::recreate(Solution &sC)
-{
+{   
+    // Definindo o parâmetro que é posto pelo programador
+    double beta = 0.1;
+
+    Data &data = Data::getInstance();
+    auto &matrizAdj = data.matrizAdj;
+    auto &arrDmd = data.arrayDmds;
+
+    // Criando uma seed aleatória
+    std::random_device rd;
+    std::mt19937 g(rd());
+
+    // Definindo a solução que será retornada
     Solution s = sC;
+    auto &rotas = s.rotas;
+
+    std::vector<int> vertsSob;
+
+    // Passando os elementos do unordened set para um vector
+    for(auto &i : s.vertSobrando)
+    {
+        vertsSob.push_back(i);
+    }
+
+    // Escolhendo uma maneira de ordenação para os vértices que estão sobrando
+    double sortMet = Random::getReal(0.0, 1.1);
+
+    if(sortMet <= 0.4)
+        std::shuffle(vertsSob.begin(), vertsSob.end(), g);
+    else if(sortMet <= 0.8)
+        std::sort(vertsSob.begin(), vertsSob.end(), 
+            [arrDmd](const int &a, const int &b) 
+            {
+                return arrDmd[a] < arrDmd[b];
+            });
+    else if(sortMet <= 1.0)
+        std::sort(vertsSob.begin(), vertsSob.end(),
+        [matrizAdj](const int &a, const int &b)
+        {
+            return matrizAdj[a][1] > matrizAdj[b][1];
+        });
+    else
+        std::sort(vertsSob.begin(), vertsSob.end(), 
+        [matrizAdj](const int &a, const int &b)
+        {
+            return matrizAdj[a][1] < matrizAdj[b][1];
+        });
+
+    // Vector que servirá como auxiliar para a seleção das rotas aleatórias
+    std::vector<int> indicesRotas;
+
+    for(int i = 0; i < rotas.size(); i++)
+    {
+        indicesRotas.push_back(i);
+    }
+
+    for(int &c : vertsSob)
+    {
+        // A posição no qual o "c" será inserido
+        int posIndex = -1, posRot = -1;
+        double custoInsert = 0;
+
+        // Aleatorizando o vector auxiliar das rotas
+        std::shuffle(indicesRotas.begin(), indicesRotas.end(), g);
+
+        for(int &i : indicesRotas)
+        {   
+            rota &rota = rotas[i];
+
+            // Se não for possível inserir o consumidor
+            if(rota.capAtual + arrDmd[c] > data.capacidade)
+                continue;
+
+            auto &tour = rota.vertices;
+
+            for(int i = 0; i < rota.vertices.size() - 1; i++)
+            {
+                if(Random::getReal(0, 1) < 1.0 - beta)
+                {   
+                    double possiInsert = matrizAdj[tour[i]][c] + matrizAdj[c][tour[i + 1]] - matrizAdj[tour[i]][tour[i + 1]];
+
+                    if(posIndex == -1 || possiInsert < custoInsert)
+                    {
+                        // Atualizando os elementos
+                        posIndex = i;
+                        posRot = &rota - &rotas[0];
+                        custoInsert = possiInsert;
+                    }
+                }
+            }
+        }
+
+        // Caso não for possível inserir, é criado uma nova rota
+        if(posIndex == -1)
+        {
+            rotas.emplace_back(rota({1, c, 1}, arrDmd[c], 2 * matrizAdj[1][c]));
+        } else // Senão, apenas inserimos o elemento na rota escolhida
+        {
+            rota &rota = rotas[posRot];
+            rota.vertices.insert(rota.vertices.begin() + posIndex + 1, c);
+            rota.capAtual += arrDmd[c];
+            rota.custo += custoInsert;
+        }
+
+        // Deletando o elemento após sua inserção na rota
+        s.vertSobrando.erase(c);
+    }
 
     return s;
 }

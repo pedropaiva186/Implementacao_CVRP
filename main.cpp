@@ -25,5 +25,9 @@ int main() {
 
     sol.exibirSolucao();
 
+    sol = Solution::recreate(sol);
+
+    sol.exibirSolucao();
+
     return 0;
 }

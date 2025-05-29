@@ -25,8 +25,8 @@ class Solution
 {   
     private:
         Solution();
-        int consultaRota(int vertice);
-        int consultaPos(int vertice, int rota);
+        int consultaRota(int &vertice);
+        int consultaPos(int &vertice, int &rota);
 
     public:
         std::vector<rota> rotas;
