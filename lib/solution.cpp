@@ -9,21 +9,50 @@
 #include "data.h"
 #include "random.h"
 
-bool compareByDist(const vert &a, const vert &b)
-{
-    return a.dist < b.dist;
-}
-
 // Structs para o uso do priority queue
 
-struct compareByRandom{
-
-    bool operator()(const int &a, const int &b)
-    {
-        return Random::getReal(0, 1) < Random::getReal(0, 1);
-    }
-
+struct compareByRandom
+{
+    bool operator()(const int &a, const int &b) {return Random::getReal(0, 1) < Random::getReal(0, 1);}
 };
+
+struct compareByDmd
+{   
+    int* arrayDmd;
+
+    compareByDmd(int *arr) : arrayDmd(arr) {};
+
+    bool operator()(const int &a, const int &b) {return arrayDmd[a] > arrayDmd[b];}
+};
+
+struct compareByFar
+{
+    double **matrizAdj;
+
+    compareByFar(double **matriz) : matrizAdj(matriz) {};
+
+    bool operator()(const int &a, const int &b) {return matrizAdj[1][a] < matrizAdj[1][b];}
+};
+
+struct compareByClose
+{   
+    double **matrizAdj;
+
+    compareByClose(double **matriz) : matrizAdj(matriz) {};
+
+    bool operator()(const int &a, const int &b) {return matrizAdj[1][a] > matrizAdj[1][b];}
+};
+
+template <typename Comparator>
+
+std::priority_queue<int>& gerarPrioQueue(Comparator comp)
+{
+    std::priority_queue<int, std::vector<int>, Comparator> pQ(comp);
+
+    return &pq;
+}
+
+
 
 Solution::Solution() : rotas(), vertSobrando(), posCRotas(), posCVertices() {}
 
@@ -162,34 +191,22 @@ void Solution::recreate(Solution &sC, Solution &s)
 
     double sortMet = Random::getReal(0.0, 1.1);
 
-    if(sortMet <= 0.4)
-        std::priority_queue<int, std::vector<int>, compareByRandom> vertsSob;
-    /*else if(sortMet <= 0.8)
-        std::sort(vertsSob.begin(), vertsSob.end(), 
-            [arrDmd](const int &a, const int &b) 
-            {
-                return arrDmd[a] < arrDmd[b];
-            });
-    else if(sortMet <= 1.0)
-        std::sort(vertsSob.begin(), vertsSob.end(),
-        [matrizAdj](const int &a, const int &b)
-        {
-            return matrizAdj[a][1] > matrizAdj[b][1];
-        });
-    else
-        std::sort(vertsSob.begin(), vertsSob.end(), 
-        [matrizAdj](const int &a, const int &b)
-        {
-            return matrizAdj[a][1] < matrizAdj[b][1];
-        });*/
+    int escolha = -1;
 
-    for(auto &i : s.vertSobrando)
-    {
-        vertsSob.push(i);
-    }
+    std::priority_queue<int> vertsSob;
 
-    for(int &c : vertsSob)
+    if(sortMet <= 0.4) vertsSob = gerarPrioQueue(compareByRandom());
+    else if(sortMet <= 0.8) vertsSob = gerarPrioQueue(compareByDmd(arrDmd));
+    else if(sortMet <= 1.0) vertsSob = gerarPrioQueue(compareByFar(matrizAdj));
+    else vertsSob = gerarPrioQueue(compareByClose(matrizAdj));
+
+    for(auto &i : s.vertSobrando) vertsSob.push(i);
+
+    while(!vertsSob.empty())
     {
+        int c = vertsSob.top();
+        vertsSob.pop();
+
         int posIndex = -1, posRot = -1, cont, start;
         double custoInsert = 0;
 
