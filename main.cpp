@@ -21,13 +21,5 @@ int main() {
 
     Solution sol = Solution::criarSolucaoInicial();
 
-    sol = Solution::ruin(sol);
-
-    sol.exibirSolucao();
-
-    sol = Solution::recreate(sol);
-
-    sol.exibirSolucao();
-
     return 0;
 }

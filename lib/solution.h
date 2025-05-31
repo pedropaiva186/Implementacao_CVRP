@@ -13,29 +13,21 @@ struct rota
     rota(std::vector<int> vertices, int capAtual, double custo) : vertices(vertices), capAtual(capAtual), custo(custo) {}
 };
 
-struct vert
-{
-    int c;
-    double dist;
-    
-    vert(int c, double dist) : c(c), dist(dist) {}
-};
-
 class Solution
 {   
     private:
         Solution();
-        int consultaRota(int &vertice);
-        int consultaPos(int &vertice, int &rota);
+        Solution(std::vector<rota> &rots, std::unordered_set<int> &vertSobr, std::vector<int> &pCRot, std::vector<int> &pCVert);
 
     public:
         std::vector<rota> rotas;
-        // Usando essa estrutura de dados pois torna a consulta e outras operações O(1)
         std::unordered_set<int> vertSobrando;
+        std::vector<int> posCRotas;
+        std::vector<int> posCVertices;
         static Solution criarSolucaoInicial();
         void exibirSolucao();
-        static Solution ruin(Solution &sC);
-        static Solution recreate(Solution &sC);
+        static void ruin(Solution &sC, Solution &s);
+        static void recreate(Solution &sC, Solution &s);
 };
 
 #endif
