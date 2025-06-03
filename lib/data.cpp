@@ -6,11 +6,6 @@
 
 #include "data.h"
 
-bool compareByDist(const vert &a, const vert &b)
-{
-    return a.dist < b.dist;
-}
-
 double Data::calculateDist(double *x1, double *y1, double *x2, double *y2)
 {
     double delta1 = *x1 - *x2;
@@ -115,7 +110,7 @@ void Data::readData(int argNum, char **args)
         instance->matrizAdj[i] = new double[instance->dim + 1];
     }
 
-    instance->listasAdj = std::vector<std::vector<vert>>(instance->dim + 1, std::vector<vert>(instance->dim + 1));
+    instance->listasAdj = std::vector<std::vector<Vert>>(instance->dim + 1, std::vector<Vert>(instance->dim));
 
     for(int count1 = 1; count1 <= instance->dim; count1++)
     {   
@@ -132,7 +127,7 @@ void Data::readData(int argNum, char **args)
             if(count1 == count2)
             {
                 instance->matrizAdj[count1][count2] = 0;
-                instance->listasAdj[count1][count2] = vert(count1, 0);
+                instance->listasAdj[count1][count2 - 1] = Vert(count1, 0);
                 continue;
             }
 
@@ -144,11 +139,14 @@ void Data::readData(int argNum, char **args)
 
             instance->matrizAdj[count1][count2] = valor;
             instance->matrizAdj[count2][count1] = valor;
-            instance->listasAdj[count1][count2] = vert(count2, valor);
-            instance->listasAdj[count2][count1] = vert(count1, valor);
+            instance->listasAdj[count1][count2 - 1] = Vert(count2, valor);
+            instance->listasAdj[count2][count1 - 1] = Vert(count1, valor);
         }
 
-        std::sort(instance->listasAdj[count1].begin() + 1, instance->listasAdj[count1].end(), compareByDist);
+        std::sort(instance->listasAdj[count1].begin(), instance->listasAdj[count1].end(), [](const Vert &a, const Vert &b)
+        {
+            return a.dist < b.dist;
+        });
     }
 
     while(1)
