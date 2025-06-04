@@ -4,13 +4,13 @@
 #include <vector>
 #include "solution.h"
 
-struct vert
+struct Vert
 {
     int c;
     double dist;
     
-    vert(int c, double dist) : c(c), dist(dist) {}
-    vert() : c(0), dist(0.0) {}
+    Vert(int c, double dist) : c(c), dist(dist) {}
+    Vert() : c(0), dist(0.0) {}
 };
 
 class Data
@@ -23,7 +23,7 @@ class Data
     public:
         int dim;
         double **matrizAdj;
-        std::vector<std::vector<vert>> listasAdj;
+        std::vector<std::vector<Vert>> listasAdj;
         int *arrayDmds;
         int capacidade;
 

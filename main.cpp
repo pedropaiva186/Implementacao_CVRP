@@ -4,6 +4,7 @@
 #include "lib/data.h"
 #include "lib/solution.h"
 #include "lib/random.h"
+#include "lib/ruinAndRecreate.h"
 
 int main() {
     std::random_device rd;
@@ -19,7 +20,16 @@ int main() {
 
     Data &data = Data::getInstance();
 
-    Solution sol = Solution::criarSolucaoInicial();
+    Solution sol, sBest;
+
+    sBest = Solution::criarSolucaoInicial();
+
+    for(int i = 0; i < 30000000; i++)
+    {
+        ruinAndRecreate(sol, sBest);
+    }
+
+    sBest.exibirSolucao();
 
     return 0;
 }
