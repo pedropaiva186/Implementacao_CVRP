@@ -1,8 +1,13 @@
 #ifndef DATA_H
 #define DATA_H
 
-#include <vector>
 #include "solution.h"
+
+#include <iostream>
+#include <fstream>
+#include <cmath>
+#include <algorithm>
+#include <vector>
 
 struct Vert
 {

@@ -1,10 +1,10 @@
 #include <iostream>
-#include <random>
 
 #include "lib/data.h"
 #include "lib/solution.h"
 #include "lib/random.h"
 #include "lib/ruinAndRecreate.h"
+#include "lib/meta.h"
 
 int main() {
     std::random_device rd;
@@ -22,11 +22,11 @@ int main() {
 
     Solution sol, sBest;
 
-    sBest = Solution::criarSolucaoInicial();
+    sol = Solution::criarSolucaoInicial();
 
-    for(int i = 0; i < 30000000; i++)
+    for(int i = 0; i < 1; i++)
     {
-        ruinAndRecreate(sol, sBest);
+        fleetSizeMinimization(sBest, sol, 1000000);
     }
 
     sBest.exibirSolucao();

@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "solution.h"
 #include "data.h"
 
@@ -30,7 +28,7 @@ void Solution::exibirSolucao()
         std::cout << v << " ";
     }
 
-    std::cout << std::endl;
+    std::cout << std::endl << "Número de rotas: " << rotas.size() << std::endl;
 }
 
 Solution Solution::criarSolucaoInicial()

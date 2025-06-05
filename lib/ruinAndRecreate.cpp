@@ -1,7 +1,3 @@
-#include <iostream>
-#include <algorithm>
-#include <queue>
-
 #include "ruinAndRecreate.h"
 
 // Declarando os parâmetros
@@ -53,9 +49,12 @@ std::priority_queue<int, std::vector<int>, Comparator> gerarPrioQueue(Comparator
 
 void ruin(Solution &s, Solution &sC)
 {   
+    if(!sC.rotas.size()) return;
+
     Data & data = Data::getInstance();
 
     s = sC;
+
     auto &rots = s.rotas;
 
     double media = 0;
@@ -96,7 +95,7 @@ void ruin(Solution &s, Solution &sC)
 
             while(m < mMax && Random::getReal(0, 1) < ALPHA) m++;
 
-            strNumEsquerda = Random::getInt(std::max((double) cardTour + m - rotAlt.vertices.size() + indexVert + 1, 0.0), indexVert - 1);
+            strNumEsquerda = Random::getInt(std::max((int)(cardTour + m - rotAlt.vertices.size() + indexVert + 1), 0), std::min(cardTour + m - 1, indexVert - 1));
             
             strNumDireita = cardTour + m - strNumEsquerda - 1;
 
@@ -142,8 +141,10 @@ void ruin(Solution &s, Solution &sC)
 }
 
 template <typename Comparator>
-void recreate(Solution &s, Solution &sC, Comparator tipoOrd)
-{   
+void recreate(Solution &s, Solution &sC, Comparator tipoOrd, bool &criarNovasRotas)
+{
+    if(!sC.rotas.size()) return;
+
     Data &data = Data::getInstance();
 
     s = sC;
@@ -189,6 +190,8 @@ void recreate(Solution &s, Solution &sC, Comparator tipoOrd)
 
         if(posIndex == -1)
         {
+            if(!criarNovasRotas) continue;
+
             rotas.emplace_back(Rota({1, c, 1}, data.arrayDmds[c], 2 * data.matrizAdj[1][c]));
             s.posCRotas[c] = rotas.size() - 1;
             s.posCVertices[c] = 1;
@@ -208,31 +211,34 @@ void recreate(Solution &s, Solution &sC, Comparator tipoOrd)
     }
 }
 
-void ruinAndRecreate(Solution &s, Solution &sC)
+void ruinAndRecreate(Solution &s, Solution &sC, bool criarNovasRotas)
 {
     Data &data = Data::getInstance();
-    ruin(s, sC);
+
+    Solution aux;
+
+    ruin(aux, sC);
     
     double sortMet = Random::getReal(0.0, 1.1);
 
     if(sortMet <= 0.4)
     {
         auto c = CompareByRandom();
-        recreate(sC, s, c);
+        recreate(s, aux, c, criarNovasRotas);
     } 
     else if(sortMet <= 0.8)
     {
         auto c = CompareByDmd(data.arrayDmds);
-        recreate(sC, s, c);
+        recreate(s, aux, c, criarNovasRotas);
     }
     else if(sortMet <= 1.0)
     {
         auto c = CompareByFar(data.matrizAdj);
-        recreate(sC, s, c);
+        recreate(s, aux, c, criarNovasRotas);
     }
     else
     {
         auto c = CompareByClose(data.matrizAdj);
-        recreate(sC, s, c);
+        recreate(s, aux, c, criarNovasRotas);
     }
 }

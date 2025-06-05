@@ -1,9 +1,3 @@
-#include <iostream>
-#include <fstream>
-#include <cmath>
-#include <algorithm>
-#include <vector>
-
 #include "data.h"
 
 double Data::calculateDist(double *x1, double *y1, double *x2, double *y2)

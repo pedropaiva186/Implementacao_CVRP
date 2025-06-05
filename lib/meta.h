@@ -6,5 +6,6 @@
 #include "ruinAndRecreate.h"
 
 void fleetSizeMinimization(Solution &s, Solution &sC, int numMin);
+void simulatedAnealling(Solution &s, Solution &sC);
 
 #endif
